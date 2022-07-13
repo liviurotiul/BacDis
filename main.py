@@ -40,22 +40,22 @@ for data in querry_data:
     tempdirname = "./querry_data_temp/547_S1_ME_L001"
 
     # WARNING: the names of the fastq files sould be identical except for the R1/R2
-    # R1_path = os.path.join(tempdirname, os.listdir(tempdirname)[0])
-    # R2_path = os.path.join(tempdirname, os.listdir(tempdirname)[1])
+    R1_path = os.path.join(tempdirname, os.listdir(tempdirname)[0])
+    R2_path = os.path.join(tempdirname, os.listdir(tempdirname)[1])
 
-    # Perform quality control b4 assembly
-    # fastqc_run_fastq(tempdirname, R1_path, R2_path)
+    # # Perform quality control b4 assembly
+    fastqc_run_fastq(tempdirname, R1_path, R2_path)
 
-    # # Run assembly
-    # shovil_run(tempdirname, R1_path, R2_path)
+    # Run assembly
+    shovill_run(tempdirname, R1_path, R2_path)
 
-    reference_genomes_paths = find_extension(REFERENCE_GENOMES, ".fasta")
-    import pdb;pdb.set_trace()
+    reference_genomes_paths = os.listdir(os.path.join(REFERENCE_GENOMES, "fastas"))
+
     # Run FastANI
     for reference_genome in reference_genomes_paths:
-        FastANI(tempdirname, reference_genome, os.path.join(tempdirname, "shovil", "contigs.fasta"))
+        FastANI(tempdirname, os.path.join(REFERENCE_GENOMES, "fastas", reference_genome), os.path.join(tempdirname, "shovill", "contigs.fasta"))
 
-    import pdb;pdb.set_trace()
+    mlst_run(tempdirname, os.path.join(tempdirname, "shovill", "contigs.fasta"))
 
     # # Work in a temporary folder
     # with tempfile.TemporaryDirectory() as tempdirname:
@@ -71,7 +71,7 @@ for data in querry_data:
     #     fastqc(tempdirname, R1_path, R2_path)
 
     #     # Run assembly
-    #     shovil(tempdirname, R1_path, R2_path)
+    #     shovill(tempdirname, R1_path, R2_path)
 
     #     import pdb;pdb.set_trace()
 

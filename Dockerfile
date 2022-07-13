@@ -11,6 +11,11 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
+RUN apt-get -y update
+RUN apt-get -y install libgsl-dev
+RUN apt-get -y install libopenblas-dev
+RUN apt-get -y install file
+
 # Create the environment:
 COPY environment.yml .
 RUN conda env create -f environment.yml
@@ -23,6 +28,8 @@ SHELL ["/bin/bash", "--login", "-c"]
 RUN conda install -c bioconda shovill
 RUN conda install -c bioconda fastani
 RUN conda install -c bioconda fastqc
+RUN conda install -c bioconda mlst
+
 
 WORKDIR /app
 COPY . /app
