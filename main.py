@@ -9,8 +9,9 @@ from app.stage1 import *
 
 # Provide paths
 DATABASE_PATH = "./database"
-QUERRY_DATA_PATH = "./querry_data_temp"
-REFERENCE_GENOMES = "./reference_genomes"
+# QUERRY_DATA_PATH = "./querry_data_temp" # For testing
+QUERRY_DATA_PATH = "./querry_data"
+REFERENCE_GENOMES_PATH = "./reference_genomes"
 STORE_DATA = True
 
 
@@ -32,48 +33,42 @@ querry_data = os.listdir(QUERRY_DATA_PATH)
 
 for data in querry_data:
 
-    data_path = os.path.join(QUERRY_DATA_PATH, data)
+    # Work in a temporary folder
+    with tempfile.TemporaryDirectory() as tempdirname:
 
-    # if len(os.listdir(data_path)) != 2:
-    #     raise RuntimeError("Each sample folder must have exactly 2 files for paired reads")
+        # Copy the files to the temp folder
+        data_path = os.path.join(QUERRY_DATA_PATH, data)
 
-    tempdirname = "./querry_data_temp/547_S1_ME_L001"
+        os.system("cp " + data_path+"/* " + tempdirname)
 
-    # WARNING: the names of the fastq files sould be identical except for the R1/R2
-    R1_path = os.path.join(tempdirname, os.listdir(tempdirname)[0])
-    R2_path = os.path.join(tempdirname, os.listdir(tempdirname)[1])
+        reference_genomes = os.listdir(os.path.join(REFERENCE_GENOMES_PATH, "fastas"))
 
-    # # Perform quality control b4 assembly
-    fastqc_run_fastq(tempdirname, R1_path, R2_path)
+        # WARNING: the names of the fastq files sould be identical except for the R1/R2
+        R1_path = os.path.join(tempdirname, os.listdir(tempdirname)[0])
+        R2_path = os.path.join(tempdirname, os.listdir(tempdirname)[1])
 
-    # Run assembly
-    shovill_run(tempdirname, R1_path, R2_path)
+        # Perform quality control b4 assembly
+        fastqc_run_fastq(tempdirname, R1_path, R2_path)
 
-    reference_genomes_paths = os.listdir(os.path.join(REFERENCE_GENOMES, "fastas"))
+        # Run assembly
+        shovill_run(tempdirname, R1_path, R2_path)
 
-    # Run FastANI
-    for reference_genome in reference_genomes_paths:
-        FastANI(tempdirname, os.path.join(REFERENCE_GENOMES, "fastas", reference_genome), os.path.join(tempdirname, "shovill", "contigs.fasta"))
+        contigs_path = os.path.join(tempdirname, "shovill", "contigs.fasta")
 
-    mlst_run(tempdirname, os.path.join(tempdirname, "shovill", "contigs.fasta"))
+        # Run FastANI
+        for reference_genome in reference_genomes:
+            FastANI(
+                tempdirname,
+                os.path.join(REFERENCE_GENOMES_PATH, "fastas", reference_genome),
+                contigs_path
+            )
 
-    # # Work in a temporary folder
-    # with tempfile.TemporaryDirectory() as tempdirname:
+        # Run MLST
+        mlst_run(tempdirname, contigs_path)
 
-    #     # Copy the files to the temp folder
-    #     os.system("cp " + data_path+"/* " + tempdirname)
+        
 
-    #     # WARNING: the names of the fastq files sould be identical except for the R1/R2
-    #     R1_path = os.path.join(tempdirname, os.listdir(tempdirname)[0])
-    #     R2_path = os.path.join(tempdirname, os.listdir(tempdirname)[1])
 
-    #     # Perform quality control b4 assembly
-    #     fastqc(tempdirname, R1_path, R2_path)
-
-    #     # Run assembly
-    #     shovill(tempdirname, R1_path, R2_path)
-
-    #     import pdb;pdb.set_trace()
 
 
         
